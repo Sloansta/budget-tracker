@@ -7,6 +7,8 @@ request.onupgradeneeded = function(e) {
     const db = e.target.result;
 
     db.createObjectStore('new_transaction', { autoIncrement: true });
+
+    console.log(db);
 };
 
 request.onsuccess = function(e) {
@@ -21,6 +23,7 @@ request.onerror = function(e) {
 };
 
 function saveRecord(record) {
+    console.log('adding record to indexeddb');
     const transaction = db.transaction(['new_transaction'], 'readwrite');
 
     const transactionObjectStore = transaction.objectStore('new_transaction');
@@ -35,7 +38,7 @@ function uploadRecord() {
 
     const getAll = transactionObjectStore.getAll();
 
-    getAll.success = function() {
+    getAll.onsuccess = function() {
         // if there was data in the db =>
         if(getAll.result.length > 0) {
             fetch('/api/transaction', {
@@ -58,10 +61,11 @@ function uploadRecord() {
 
                     alert('All transaction data has been submitted');
                 })
-                .catch(err => console.log(err));
+                .catch(err => {
+                    console.log(err);
+                });
         }
     };
 }
 
 window.addEventListener('online', uploadRecord);
-window.addEventListener('offline', saveRecord);
